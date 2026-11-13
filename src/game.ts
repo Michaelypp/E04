@@ -3,16 +3,15 @@ import {
   type Actor,
   type Arena,
   Bullet,
+  type Enemy,
+  ENEMY_STATS,
   HEIGHT,
   Player,
-  WIDTH,
-} from "./actors.ts";
-import {
-  type PrefabStats,
   ShmupBoss,
   ShmupPowerUp,
-  ShmupPrefabSprite,
-} from "./prefab.ts";
+  WaveEnemy,
+  WIDTH,
+} from "./actors.ts";
 import type { Hud } from "./hud.ts";
 import type { LaunchOptions } from "./main.ts";
 import { AutoPilot, KeyboardPilot, type Pilot } from "./pilots.ts";
@@ -25,36 +24,6 @@ import { ROUTE, type Wave } from "./route.ts";
 const TICK_MS = 1000 / 60;
 const START_LIVES = 3;
 const SECTOR_CLEAR_GRACE_TICKS = 240;
-const ENEMY_STATS = {
-  drone: {
-    texture: "drone",
-    hp: 2,
-    score: 100,
-    radius: 13,
-    dropChance: 0.015,
-  },
-  dart: {
-    texture: "dart",
-    hp: 1,
-    score: 150,
-    radius: 12,
-    dropChance: 0.015,
-  },
-  turret: {
-    texture: "turret",
-    hp: 12,
-    score: 400,
-    radius: 19,
-    dropChance: 0.3,
-  },
-  lancer: {
-    texture: "lancer",
-    hp: 4,
-    score: 250,
-    radius: 15,
-    dropChance: 0.06,
-  },
-} satisfies Record<Wave["kind"], PrefabStats>;
 const VICTORY_TICKS = 180;
 /** Seconds of idling before the title hands the ship to the autopilot. */
 const IDLE_SECONDS = 8;
@@ -81,7 +50,7 @@ export class GameScene extends Phaser.Scene implements Arena {
   private run;
   private pilot!: Pilot;
   private backdrop!: Backdrop;
-  private enemies: ShmupPrefabSprite[] = [];
+  private enemies: Enemy[] = [];
   private shots: Bullet[] = [];
   private bullets: Bullet[] = [];
   private pickups: ShmupPowerUp[] = [];
@@ -350,15 +319,7 @@ export class GameScene extends Phaser.Scene implements Arena {
 
   summon(_kind: string, x: number, y: number): void {
     this.enemies.push(
-      new ShmupPrefabSprite(
-        this,
-        x,
-        y,
-        "drone",
-        ENEMY_STATS.drone,
-        x,
-        x < WIDTH / 2 ? 1 : -1,
-      ),
+      new WaveEnemy(this, x, y, ENEMY_STATS.drone, x < WIDTH / 2 ? 1 : -1),
     );
   }
 
@@ -470,15 +431,7 @@ export class GameScene extends Phaser.Scene implements Arena {
       }
       if (t !== at) continue;
       this.enemies.push(
-        new ShmupPrefabSprite(
-          this,
-          x,
-          y,
-          wave.kind,
-          stats,
-          x,
-          side,
-        ),
+        new WaveEnemy(this, x, y, stats, side),
       );
     }
   }
@@ -523,7 +476,7 @@ export class GameScene extends Phaser.Scene implements Arena {
     }
   }
 
-  private destroyEnemy(enemy: ShmupPrefabSprite): void {
+  private destroyEnemy(enemy: Enemy): void {
     enemy.setActive(false);
     this.run.score += enemy.score;
     this.run.kills++;
