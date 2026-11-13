@@ -6,8 +6,10 @@ import { TINTS } from "../textures.ts";
 import { Backdrop } from "./backdrop.ts";
 import { fadeTo } from "./boot.ts";
 
+import type { RunTotals } from "./play.ts";
+
 export type CutsceneData = {
-  run: { score: number; kills: number; hits: number; continues: number };
+  run: Pick<RunTotals, "score" | "kills" | "hits" | "continues">;
   demo: boolean;
 };
 
