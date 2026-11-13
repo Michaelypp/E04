@@ -7,7 +7,12 @@ import {
   Player,
   WIDTH,
 } from "./actors.ts";
-import { ShmupBoss, ShmupPowerUp, ShmupPrefabSprite } from "./prefab.ts";
+import {
+  type PrefabStats,
+  ShmupBoss,
+  ShmupPowerUp,
+  ShmupPrefabSprite,
+} from "./prefab.ts";
 import type { Hud } from "./hud.ts";
 import type { LaunchOptions } from "./main.ts";
 import { AutoPilot, KeyboardPilot, type Pilot } from "./pilots.ts";
@@ -21,35 +26,35 @@ const TICK_MS = 1000 / 60;
 const START_LIVES = 3;
 const SECTOR_CLEAR_GRACE_TICKS = 240;
 const ENEMY_STATS = {
-  "drone": {
-    "hp": 2,
-    "score": 100,
-    "radius": 13,
-    "dropChance": 0.015,
-    "canShoot": true,
+  drone: {
+    texture: "drone",
+    hp: 2,
+    score: 100,
+    radius: 13,
+    dropChance: 0.015,
   },
-  "dart": {
-    "hp": 1,
-    "score": 150,
-    "radius": 12,
-    "dropChance": 0.015,
-    "canShoot": false,
+  dart: {
+    texture: "dart",
+    hp: 1,
+    score: 150,
+    radius: 12,
+    dropChance: 0.015,
   },
-  "turret": {
-    "hp": 12,
-    "score": 400,
-    "radius": 19,
-    "dropChance": 0.3,
-    "canShoot": true,
+  turret: {
+    texture: "turret",
+    hp: 12,
+    score: 400,
+    radius: 19,
+    dropChance: 0.3,
   },
-  "lancer": {
-    "hp": 4,
-    "score": 250,
-    "radius": 15,
-    "dropChance": 0.06,
-    "canShoot": true,
+  lancer: {
+    texture: "lancer",
+    hp: 4,
+    score: 250,
+    radius: 15,
+    dropChance: 0.06,
   },
-};
+} satisfies Record<Wave["kind"], PrefabStats>;
 const VICTORY_TICKS = 180;
 /** Seconds of idling before the title hands the ship to the autopilot. */
 const IDLE_SECONDS = 8;
@@ -350,12 +355,7 @@ export class GameScene extends Phaser.Scene implements Arena {
         x,
         y,
         "drone",
-        2,
-        100,
-        13,
-        0.015,
-        true,
-        false,
+        ENEMY_STATS.drone,
         x,
         x < WIDTH / 2 ? 1 : -1,
       ),
@@ -475,12 +475,7 @@ export class GameScene extends Phaser.Scene implements Arena {
           x,
           y,
           wave.kind,
-          stats.hp,
-          stats.score,
-          stats.radius,
-          stats.dropChance,
-          stats.canShoot,
-          false,
+          stats,
           x,
           side,
         ),
